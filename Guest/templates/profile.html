@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="container">
+            <h1>My Profile</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Profile</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Profile Content -->
+    <div class="container main-content">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-4 sidebar">
+                <div class="profile-card">
+                    <div class="profile-avatar">
+                        <img src="{% static 'assets/user.png' %}" alt="Profile Picture" class="img-fluid">
+                        <button class="btn-edit-avatar">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                    <div class="profile-info">
+                        <h3>{{ user.name }}</h3>
+                        <p class="text-muted">Premium Member</p>
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <span class="rating-text">4.5 (12 reviews)</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">{{ roomno }}</div>
+                            <div class="stat-label">Apartments</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ houseno }}</div>
+                            <div class="stat-label">Houses</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">{{ reportno }}</div>
+                            <div class="stat-label">Reports</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-menu">
+                        <a href="#" class="menu-item active">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                        <a href="#" class="menu-item">
+                            <i class="fas fa-user-cog"></i> Account Settings
+                        </a>
+                        <a href="{% url 'booking_history' %}" class="menu-item">
+                            <i class="fas fa-history"></i> Booking History
+                        </a>
+                        <a href="{% url 'received_bookings' %}" class="menu-item">
+                            <i class="fas fa-bell"></i> Received Bookings
+                        </a>
+                        <a href="#" class="menu-item">
+                            <i class="fas fa-question-circle"></i> Help Center
+                        </a>
+                    </div>
+
+                    <div class="profile-contact">
+                        <h5>Contact Information</h5>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>{{ user.email }}</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <span>{{ user.number }}</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ user.location }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-8 content">
+                {% if messages %}
+                <div class="alert-container">
+                    {% for message in messages %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="/post/" class="action-card apartment">
+                                <div class="action-icon">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="action-text">
+                                    <h4>Post Apartment</h4>
+                                    <p>List your apartment for rent</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="/posth/" class="action-card house">
+                                <div class="action-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="action-text">
+                                    <h4>Post House</h4>
+                                    <p>List your house for rent</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Listings -->
+                <div class="listings-section">
+                    {% if room %}
+                    <div class="section-header">
+                        <h3>My Apartments</h3>
+                        <a href="#" class="view-all">View All</a>
+                    </div>
+                    <div class="row">
+                        {% for i in room.0 %}
+                        <div class="col-lg-6 col-md-12">
+                            <div class="listing-card">
+                                <div class="listing-image">
+                                    <img src="{{ i.img.url }}" alt="Apartment Image">
+                                    <div class="listing-badge">Active</div>
+                                    <button class="wishlist-btn">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                </div>
+                                <div class="listing-details">
+                                    <h4>₹{{ i.cost }}/month</h4>
+                                    <p class="location">
+                                        <i class="fas fa-map-marker-alt"></i> {{ i.location }}
+                                    </p>
+                                    <p class="listing-id">ID: {{ i.room_id }}</p>
+                                    <div class="listing-actions">
+                                        <form action="/descr">
+                                            <input type="hidden" name="id" value="{{ i.room_id }}">
+                                            <button type="submit" class="btn btn-view">
+                                                <i class="fas fa-eye"></i> View
+                                            </button>
+                                        </form>
+                                        <form action="/deleter">
+                                            <input type="hidden" name="id" value="{{ i.room_id }}">
+                                            <button type="submit" class="btn btn-delete">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <img src="{% static 'assets/no-apartments.svg' %}" alt="No Apartments" class="empty-img">
+                        <h4>No Apartments Posted</h4>
+                        <p>You haven't listed any apartments yet</p>
+                        <a href="/post/" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Post Your First Apartment
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    {% if house %}
+                    <div class="section-header">
+                        <h3>My Houses</h3>
+                        <a href="#" class="view-all">View All</a>
+                    </div>
+                    <div class="row">
+                        {% for i in house.0 %}
+                        <div class="col-lg-6 col-md-12">
+                            <div class="listing-card">
+                                <div class="listing-image">
+                                    <img src="{{ i.img.url }}" alt="House Image">
+                                    <div class="listing-badge">Active</div>
+                                    <button class="wishlist-btn">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                </div>
+                                <div class="listing-details">
+                                    <h4>₹{{ i.cost }}/month</h4>
+                                    <p class="location">
+                                        <i class="fas fa-map-marker-alt"></i> {{ i.location }}
+                                    </p>
+                                    <p class="listing-id">ID: {{ i.house_id }}</p>
+                                    <div class="listing-actions">
+                                        <form action="/descr">
+                                            <input type="hidden" name="id" value="{{ i.house_id }}">
+                                            <button type="submit" class="btn btn-view">
+                                                <i class="fas fa-eye"></i> View
+                                            </button>
+                                        </form>
+                                        <form action="/deleteh">
+                                            <input type="hidden" name="id" value="{{ i.house_id }}">
+                                            <button type="submit" class="btn btn-delete">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <img src="{% static 'assets/no-houses.svg' %}" alt="No Houses" class="empty-img">
+                        <h4>No Houses Posted</h4>
+                        <p>You haven't listed any houses yet</p>
+                        <a href="/posth/" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Post Your First House
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/desc.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="property-detail-container">
+    <!-- Property Header -->
+    <div class="property-header">
+        <h1>{{ val.location }}, {{ val.city }}</h1>
+        <div class="property-meta">
+            <span class="property-id">
+                {% if type == 'Apartment' %}
+                Listing #{{ val.room_id }}
+                {% else %}
+                Listing #{{ val.house_id }}
+                {% endif %}
+            </span>
+            <span class="property-date">{{ val.date }}</span>
+        </div>
+    </div>
+
+    <!-- Property Gallery & Main Info -->
+    <div class="property-main">
+        <div class="property-gallery">
+            <div class="main-image">
+                <img src="{{ val.img.url }}" alt="Property Image" class="img-fluid">
+                <button class="wishlist-btn">
+                    <i class="far fa-heart"></i> Save
+                </button>
+            </div>
+            <div class="image-thumbnails">
+                <!-- Additional images would go here -->
+                <div class="thumbnail-placeholder">+5 More</div>
+            </div>
+        </div>
+
+        <div class="property-info">
+            <div class="price-section">
+                <h2>₹{{ val.cost }} <span>/month</span></h2>
+                {% if type == 'Apartment' %}
+                <p class="property-type">{{ val.dimention }} ft. Apartment</p>
+                {% else %}
+                <p class="property-type">{{ val.area }} sqr ft. House</p>
+                {% endif %}
+            </div>
+
+            <div class="property-description">
+                <p>{{ val.desc }}</p>
+                <div class="property-location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {{ val.location }}, {{ val.city }}, {{ val.state }}
+                </div>
+            </div>
+
+            <div class="property-features">
+                <div class="feature">
+                    <i class="fas fa-bed"></i>
+                    <span>{{ val.bedrooms }} Bedrooms</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-bath"></i>
+                    <span>{{ val.bathrooms }} Bathrooms</span>
+                </div>
+                {% if type == 'House' %}
+                <div class="feature">
+                    <i class="fas fa-layer-group"></i>
+                    <span>{{ val.floor }} Floors</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="booking-section">
+                {% if user.is_authenticated %}
+                    {% if type == 'Apartment' %}
+                        <a href="{% url 'create_booking' 'room' val.room_id %}" 
+                           class="btn btn-primary btn-book">
+                           <i class="fas fa-calendar-check"></i> Book This Apartment
+                        </a>
+                    {% else %}
+                        <a href="{% url 'create_booking' 'house' val.house_id %}" 
+                           class="btn btn-primary btn-book">
+                           <i class="fas fa-calendar-check"></i> Book This House
+                        </a>
+                    {% endif %}
+                {% else %}
+                    {% if type == 'Apartment' %}
+                        <a href="{% url 'login' %}?next={% url 'create_booking' 'room' val.room_id %}" 
+                           class="btn btn-primary btn-book">
+                           <i class="fas fa-sign-in-alt"></i> Login to Book
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}?next={% url 'create_booking' 'house' val.house_id %}" 
+                           class="btn btn-primary btn-book">
+                           <i class="fas fa-sign-in-alt"></i> Login to Book
+                        </a>
+                    {% endif %}
+                {% endif %}
+                <button class="btn btn-outline-secondary btn-contact">
+                    <i class="fas fa-envelope"></i> Contact Owner
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Property Details Section -->
+    <div class="property-details">
+        <div class="details-section">
+            <h3><i class="fas fa-info-circle"></i> Property Details</h3>
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Type:</span>
+                    <span class="detail-value">{{ type }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Price:</span>
+                    <span class="detail-value">₹{{ val.cost }}/month</span>
+                </div>
+                {% if type == 'House' %}
+                <div class="detail-item">
+                    <span class="detail-label">Area:</span>
+                    <span class="detail-value">{{ val.area }} sq ft</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Floors:</span>
+                    <span class="detail-value">{{ val.floor }}</span>
+                </div>
+                {% else %}
+                <div class="detail-item">
+                    <span class="detail-label">Dimensions:</span>
+                    <span class="detail-value">{{ val.dimention }} ft</span>
+                </div>
+                {% endif %}
+                <div class="detail-item">
+                    <span class="detail-label">Bedrooms:</span>
+                    <span class="detail-value">{{ val.bedrooms }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Kitchen:</span>
+                    <span class="detail-value">{{ val.kitchen }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Living Room:</span>
+                    <span class="detail-value">{{ val.hall }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Balcony:</span>
+                    <span class="detail-value">{{ val.balcany }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Air Conditioning:</span>
+                    <span class="detail-value">{{ val.AC }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Posted On:</span>
+                    <span class="detail-value">{{ val.date }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="owner-section">
+            <h3><i class="fas fa-user"></i> Owner Information</h3>
+            <div class="owner-card">
+                <div class="owner-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="owner-info">
+                    <h4>{{ user.name }}</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> {{ user.location }}, {{ user.city }}, {{ user.state }}</p>
+                    <p><i class="fas fa-envelope"></i> {{ user.email }}</p>
+                    <p><i class="fas fa-phone"></i> {{ user.number }}</p>
+                </div>
+                <div class="owner-actions">
+                    <button class="btn btn-outline-primary">
+                        <i class="fas fa-comment"></i> Message
+                    </button>
+                    <button class="btn btn-outline-secondary">
+                        <i class="fas fa-phone"></i> Call
+                    </button>
+                </div>
+            </div>
+            <div class="report-link">
+                <a href="/contact"><i class="fas fa-flag"></i> Report this listing</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Section -->
+    <div class="map-section">
+        <h3><i class="fas fa-map-marked-alt"></i> Location</h3>
+        <div class="map-placeholder">
+            <img src="{% static 'assets/map-placeholder.jpg' %}" alt="Location Map" class="img-fluid">
+            <button class="btn btn-outline-primary btn-view-map">
+                <i class="fas fa-expand"></i> View Larger Map
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block body %}
+<!-- Search Hero Section -->
+<div class="search-hero">
+    <div class="container">
+        <div class="search-header">
+            <h1>Find Your Perfect Property</h1>
+            <p class="lead">Search across thousands of listings to find your ideal home</p>
+        </div>
+
+        {% if messages %}
+        <div class="alert-container">
+            {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>{{ message }}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="search-box-container">
+            <form method="GET" action="/search" class="search-form">
+                <div class="search-input-group">
+                    <div class="search-field">
+                        <i class="fas fa-search"></i>
+                        <input type="text" name="q" placeholder="Enter location, city or neighborhood..." 
+                               {% if q %}value="{{q}}"{% endif %} class="form-control">
+                    </div>
+                    <div class="search-filter">
+                        <select name="type" class="form-select">
+                            <option value="House">House</option>
+                            <option value="Apartment">Apartment</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary search-btn">
+                        Search <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Filters Section -->
+<div class="filters-section">
+    <div class="container">
+        <div class="filter-tabs">
+            <span class="filter-label">Filter by:</span>
+            <button class="filter-btn active">All Properties</button>
+            <button class="filter-btn">
+                <i class="fas fa-home me-2"></i>Type
+            </button>
+            <button class="filter-btn">
+                <i class="fas fa-tag me-2"></i>Price
+            </button>
+            <button class="filter-btn">
+                <i class="fas fa-map-marker-alt me-2"></i>Location
+            </button>
+            <button class="filter-btn advanced-btn">
+                <i class="fas fa-sliders-h me-2"></i>Advanced
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Results Section -->
+<div class="results-section">
+    <div class="container">
+        {% if result.0 %}
+        <div class="results-header">
+            <h2>Search Results</h2>
+            <p class="results-count">{{ result.0|length }} properties found</p>
+        </div>
+
+        <div class="property-grid">
+            {% for i in result.0 %}
+            <div class="property-card">
+                <div class="property-badge">
+                    {% if type == 'House' %}House{% else %}Apartment{% endif %}
+                </div>
+                <div class="property-image">
+                    <img src="{{ i.img.url }}" alt="{{ i.desc|slice:'0:20' }}">
+                    <button class="wishlist-btn">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="property-details">
+                    <div class="price">₹{{ i.cost }}<span>/month</span></div>
+                    <h3 class="title">{{ i.desc|slice:"0:25" }}</h3>
+                    <p class="location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        {{ i.location }}, {{ i.city }}
+                    </p>
+                    <div class="property-features">
+                        <span><i class="fas fa-bed"></i> {{ i.bedrooms }} Beds</span>
+                        <span><i class="fas fa-bath"></i> {{ i.bathrooms }} Baths</span>
+                        <span><i class="fas fa-ruler-combined"></i> {{ i.area }} sq.ft</span>
+                    </div>
+                </div>
+                <div class="property-actions">
+                    {% if type == 'House' %}
+                    <form action="/descr">
+                        <input type="hidden" name="id" value="{{ i.house_id }}">
+                        <button type="submit" class="btn btn-view">
+                            <i class="fas fa-eye me-2"></i>View Details
+                        </button>
+                    </form>
+                    {% else %}
+                    <form action="/descr">
+                        <input type="hidden" name="id" value="{{ i.room_id }}">
+                        <button type="submit" class="btn btn-view">
+                            <i class="fas fa-eye me-2"></i>View Details
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="pagination-container">
+            <nav aria-label="Search results pagination">
+                <ul class="pagination">
+                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                </ul>
+            </nav>
+        </div>
+        {% else %}
+        <div class="no-results">
+            <img src="{% static 'assets/search-empty.svg' %}" alt="No results" class="no-results-img">
+            <h3>Start Your Search</h3>
+            <p>Enter your search criteria to find available properties</p>
+            <button class="btn btn-primary">
+                <i class="fas fa-search me-2"></i>Explore Properties
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

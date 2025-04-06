@@ -1,0 +1,33 @@
+
+{% block content %}
+<h2>Pending Booking Requests</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Booking ID</th>
+            <th>User</th>
+            <th>Property</th>
+            <th>Dates</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking in bookings %}
+        <tr>
+            <td>{{ booking.id }}</td>
+            <td>{{ booking.user.email }}</td>
+            <td>{{ booking.property }}</td>
+            <td>{{ booking.check_in }} to {{ booking.check_out }}</td>
+            <td>
+                <a href="{% url 'update_booking_status' booking.id 'approved' %}" class="btn btn-success btn-sm">Approve</a>
+                <a href="{% url 'update_booking_status' booking.id 'rejected' %}" class="btn btn-danger btn-sm">Reject</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No pending bookings</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

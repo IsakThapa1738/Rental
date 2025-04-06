@@ -1,0 +1,56 @@
+
+{% block content %}
+<div class="container mt-4">
+    <h2>My Booking History</h2>
+    {% if bookings %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>Owner</th>
+                    <th>Dates</th>
+                    <th>Status</th>
+                    <th>Total Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>
+                        {% if booking.property_type == 'room' %}
+                            Apartment #{{ booking.room.room_id }}
+                        {% else %}
+                            House #{{ booking.house.house_id }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if booking.property_type == 'room' %}
+                            {{ booking.room.user_email.name }}
+                        {% else %}
+                            {{ booking.house.user_email.name }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ booking.check_in|date:"M d" }} - {{ booking.check_out|date:"M d" }}
+                        ({{ booking.get_duration }} nights)
+                    </td>
+                    <td>
+                        <span class="badge 
+                            {% if booking.status == 'approved' %}bg-success
+                            {% elif booking.status == 'rejected' %}bg-danger
+                            {% else %}bg-warning{% endif %}">
+                            {{ booking.get_status_display }}
+                        </span>
+                    </td>
+                    <td>₹{{ booking.get_total_price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">You haven't made any bookings yet.</div>
+    {% endif %}
+</div>
+{% endblock %}

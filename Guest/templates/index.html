@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container hero-content text-center">
+        <h1 class="display-4 fw-bold">Find Your Perfect Home</h1>
+        <p class="lead">Discover properties that match your lifestyle</p>
+        <div class="search-box mt-4">
+            <form class="row g-3 justify-content-center">
+                <div class="col-md-5">
+                    <input type="text" class="form-control form-control-lg" placeholder="Location, city, or neighborhood">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select form-select-lg">
+                        <option selected>Property Type</option>
+                        <option>Apartment</option>
+                        <option>House</option>
+                        <option>Villa</option>
+                        <option>Condo</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-accent btn-lg w-100">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container">
+    <!-- Apartments Section -->
+    {% if room %}
+    <section class="property-section">
+        <h2 class="section-title">Recommended Apartments</h2>
+        <div class="row">
+            {% for i in room.0 %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="property-card">
+                    <div class="position-relative">
+                        <img src="{{i.img.url}}" class="property-img" alt="{{i.desc|slice:'0:20'}}">
+                        <span class="property-type">Apartment</span>
+                        <div class="property-badge">Featured</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="price-tag">₹{{i.cost}}<span class="text-muted small">/month</span></div>
+                                <h3 class="property-title">{{i.desc|slice:"0:25"}}</h3>
+                                <p class="location">
+                                    <i class="fas fa-map-marker-alt text-accent me-1"></i>
+                                    {{i.location}}, {{i.city}}
+                                </p>
+                            </div>
+                            <div class="property-actions">
+                                <button class="btn btn-sm btn-outline-secondary rounded-circle">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="property-features">
+                            <span><i class="fas fa-bed me-1"></i> {{i.bedrooms}} Beds</span>
+                            <span><i class="fas fa-bath me-1"></i> {{i.bathrooms}} Baths</span>
+                            <span><i class="fas fa-ruler-combined me-1"></i> {{i.area}} sq.ft</span>
+                        </div>
+                        <form action="/descr" class="mt-3">
+                            <input type="hidden" name="id" value="{{i.room_id}}">
+                            <button type="submit" class="btn btn-accent w-100">
+                                <i class="fas fa-eye me-2"></i>View Details
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="#" class="btn btn-outline-primary">
+                View All Apartments <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Houses Section -->
+    {% if house %}
+    <section class="property-section">
+        <h2 class="section-title">Recommended Houses</h2>
+        <div class="row">
+            {% for i in house.0 %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="property-card">
+                    <div class="position-relative">
+                        <img src="{{i.img.url}}" class="property-img" alt="{{i.desc|slice:'0:20'}}">
+                        <span class="property-type">House</span>
+                        <div class="property-badge">New</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="price-tag">₹{{i.cost}}<span class="text-muted small">/month</span></div>
+                                <h3 class="property-title">{{i.desc|slice:"0:25"}}</h3>
+                                <p class="location">
+                                    <i class="fas fa-map-marker-alt text-accent me-1"></i>
+                                    {{i.location}}, {{i.city}}
+                                </p>
+                            </div>
+                            <div class="property-actions">
+                                <button class="btn btn-sm btn-outline-secondary rounded-circle">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="property-features">
+                            <span><i class="fas fa-bed me-1"></i> {{i.bedrooms}} Beds</span>
+                            <span><i class="fas fa-bath me-1"></i> {{i.bathrooms}} Baths</span>
+                            <span><i class="fas fa-ruler-combined me-1"></i> {{i.area}} sq.ft</span>
+                        </div>
+                        <form action="/descr" class="mt-3">
+                            <input type="hidden" name="id" value="{{i.house_id}}">
+                            <button type="submit" class="btn btn-accent w-100">
+                                <i class="fas fa-eye me-2"></i>View Details
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="#" class="btn btn-outline-primary">
+                View All Houses <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Call to Action -->
+    <section class="cta-section py-5 my-5 bg-light rounded-3">
+        <div class="container text-center py-4">
+            <h2 class="mb-4">Can't Find What You're Looking For?</h2>
+            <p class="lead mb-4">Let us help you find the perfect property that matches your needs</p>
+            <button class="btn btn-primary btn-lg px-4">
+                <i class="fas fa-headset me-2"></i>Contact Our Agents
+            </button>
+        </div>
+    </section>
+</div>
+{% endblock %}
