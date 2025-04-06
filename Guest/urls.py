@@ -45,7 +45,7 @@ urlpatterns = [
     re_path(r'^descr/',views.descr),
     re_path(r'^deleter', views.deleter),
     re_path(r'^deleteh', views.deleteh),
-    re_path(r'^search/', views.search),
+    re_path(r'^search/', views.search, name='search'),
     path('book/<str:property_type>/<int:property_id>/', 
          views.create_booking, name='create_booking'),
     path('bookings/', views.booking_history, name='booking_history'),

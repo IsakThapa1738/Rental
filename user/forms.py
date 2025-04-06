@@ -28,3 +28,6 @@ class BookingForm(forms.ModelForm):
                 raise ValidationError("Check-in date cannot be in the past")
         
         return cleaned_data
+    
+
+

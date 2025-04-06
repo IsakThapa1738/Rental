@@ -1,56 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
 
-{% block content %}
-<div class="container mt-4">
-    <h2>My Booking History</h2>
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="booking-history-container">
+    <div class="page-header">
+        <h2><i class="fas fa-history"></i> My Booking History</h2>
+        <p>View all your past and current bookings</p>
+    </div>
+    
     {% if bookings %}
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Property</th>
-                    <th>Owner</th>
-                    <th>Dates</th>
-                    <th>Status</th>
-                    <th>Total Price</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for booking in bookings %}
-                <tr>
-                    <td>
-                        {% if booking.property_type == 'room' %}
-                            Apartment #{{ booking.room.room_id }}
-                        {% else %}
-                            House #{{ booking.house.house_id }}
-                        {% endif %}
-                    </td>
-                    <td>
+    <div class="booking-list">
+        {% for booking in bookings %}
+        <div class="booking-item {% if booking.status == 'approved' %}approved{% elif booking.status == 'rejected' %}rejected{% else %}pending{% endif %}">
+            <div class="booking-header">
+                <h3>
+                    {% if booking.property_type == 'room' %}
+                        Apartment #{{ booking.room.room_id }}
+                    {% else %}
+                        House #{{ booking.house.house_id }}
+                    {% endif %}
+                </h3>
+                <span class="status-badge">{{ booking.get_status_display }}</span>
+            </div>
+            
+            <div class="booking-details">
+                <div class="detail">
+                    <i class="fas fa-user"></i>
+                    <span>
                         {% if booking.property_type == 'room' %}
                             {{ booking.room.user_email.name }}
                         {% else %}
                             {{ booking.house.user_email.name }}
                         {% endif %}
-                    </td>
-                    <td>
-                        {{ booking.check_in|date:"M d" }} - {{ booking.check_out|date:"M d" }}
-                        ({{ booking.get_duration }} nights)
-                    </td>
-                    <td>
-                        <span class="badge 
-                            {% if booking.status == 'approved' %}bg-success
-                            {% elif booking.status == 'rejected' %}bg-danger
-                            {% else %}bg-warning{% endif %}">
-                            {{ booking.get_status_display }}
-                        </span>
-                    </td>
-                    <td>₹{{ booking.get_total_price }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    </span>
+                </div>
+                <div class="detail">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>{{ booking.check_in|date:"M d, Y" }} - {{ booking.check_out|date:"M d, Y" }}</span>
+                </div>
+                <div class="detail">
+                    <i class="fas fa-moon"></i>
+                    <span>{{ booking.get_duration }} nights</span>
+                </div>
+                <div class="detail">
+                    <i class="fas fa-tag"></i>
+                    <span>₹{{ booking.get_total_price }}</span>
+                </div>
+            </div>
+            
+            <div class="booking-actions">
+                <a href="#" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-file-alt"></i> View Details
+                </a>
+                {% if booking.status == 'approved' %}
+                <a href="#" class="btn btn-outline-success btn-sm">
+                    <i class="fas fa-print"></i> Print Receipt
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
     </div>
     {% else %}
-    <div class="alert alert-info">You haven't made any bookings yet.</div>
+    <div class="empty-state">
+        <img src="{% static 'assets/no-bookings.svg' %}" alt="No bookings" class="empty-img">
+        <h4>No Bookings Yet</h4>
+        <p>You haven't made any bookings yet. Start exploring properties to book your stay.</p>
+        <a href="/home" class="btn btn-primary">
+            <i class="fas fa-search"></i> Browse Properties
+        </a>
+    </div>
     {% endif %}
 </div>
 {% endblock %}

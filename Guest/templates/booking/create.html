@@ -1,17 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
 
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+{% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <h2>Book {{ property_type|title }}</h2>
-    <div class="card">
-        <div class="card-body">
-            <h4>{{ property }}</h4>
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-primary">Submit Booking</button>
-            </form>
+{% block body %}
+<div class="booking-create-container">
+    <div class="booking-header">
+        <h2>Book {{ property_type|title }}</h2>
+        <p>Complete your booking details below</p>
+    </div>
+    
+    <div class="booking-card">
+        <div class="property-info">
+            <h3>{{ property }}</h3>
+            <div class="property-meta">
+                <span><i class="fas fa-map-marker-alt"></i> {{ property.location }}</span>
+                <span><i class="fas fa-tag"></i> ₹{{ property.cost }}/month</span>
+            </div>
+        </div>
+        
+        <form method="post" class="booking-form">
+            {% csrf_token %}
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_check_in">Check-in Date</label>
+                    {{ form.check_in }}
+                </div>
+                <div class="form-group">
+                    <label for="id_check_out">Check-out Date</label>
+                    {{ form.check_out }}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_notes">Special Requests</label>
+                {{ form.notes }}
+                <small class="form-text">Any special requirements or notes for the owner</small>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-book">
+                    <i class="fas fa-calendar-check"></i> Confirm Booking
+                </button>
+                <a href="{{ request.META.HTTP_REFERER }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="booking-summary">
+        <h4><i class="fas fa-receipt"></i> Booking Summary</h4>
+        <div class="summary-details">
+            <div class="summary-item">
+                <span>Duration:</span>
+                <span id="duration-display">-</span>
+            </div>
+            <div class="summary-item">
+                <span>Total Price:</span>
+                <span id="price-display">-</span>
+            </div>
         </div>
     </div>
 </div>
+
+<script id="daily-rate" type="application/json">{{ property.cost|default:"0" }}</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const checkIn = document.getElementById('id_check_in');
+    const checkOut = document.getElementById('id_check_out');
+    const durationDisplay = document.getElementById('duration-display');
+    const priceDisplay = document.getElementById('price-display');
+
+    const dailyRate = JSON.parse(document.getElementById('daily-rate').textContent);
+
+    function calculateBooking() {
+        if (checkIn.value && checkOut.value) {
+            const start = new Date(checkIn.value);
+            const end = new Date(checkOut.value);
+            const timeDiff = end - start;
+
+            if (timeDiff >= 0) {
+                const oneDay = 24 * 60 * 60 * 1000;
+                const diffDays = Math.round(timeDiff / oneDay);
+
+                durationDisplay.textContent = `${diffDays} night${diffDays !== 1 ? 's' : ''}`;
+                priceDisplay.textContent = `₹${(dailyRate * diffDays).toLocaleString()}`;
+            } else {
+                durationDisplay.textContent = '-';
+                priceDisplay.textContent = '-';
+            }
+        }
+    }
+
+    checkIn.addEventListener('change', calculateBooking);
+    checkOut.addEventListener('change', calculateBooking);
+
+    if (typeof flatpickr !== 'undefined') {
+        flatpickr(checkIn, { minDate: 'today' });
+        flatpickr(checkOut, { minDate: 'today' });
+    }
+});
+</script>
+
+
 {% endblock %}

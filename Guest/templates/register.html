@@ -1,40 +1,175 @@
 {% extends 'base.html' %}
-{%load static%}
+{% load static %}
 
-{%block button%}
-<a class="btn btn-outline-success navbar-login-btn-sm" href="/login" style="color: white;"><strong>Login</strong></a>
-{%endblock%}
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/register.css' %}">
+{% endblock %}
 
-{%block body%}
-<div class="w3-container" style="margin-top:1%; margin-left: 5%; margin-right: 5%;">
-    <h2>Sign up</h2>
-    <div class="alert alert-info" role="alert">
-      {%if msg%}
-    <p>{{msg}}</p>
-    {%endif%}
-    </div>
-    
-    <form class="modal-content animate" action="/register" method="post">
-        <div class="container">
-            {% csrf_token %}
-            <label for="name"><b>Name</b></label>
-            <input type="text" placeholder="Enter Name" name="name" required>
-            <label for="email"><b>Email</b></label>
-            <input type="text" placeholder="user@host.com" name="email" required>
-            <label for="location"><b>Location</b></label>
-            <input type="text" placeholder="Alambagh" name="location" required>
-            <label for="city"><b>City</b></label>
-            <input type="text" placeholder="Lucknow" name="city" required>
-            <label for="state"><b>State</b></label>
-            <input type="text" placeholder="Uttar pradesh" name="state" required>
-            <label for="Phone"><b>Phone Number</b></label>
-            <input type="number" placeholder="Enter 10 digit Number" name="phone" required>
-            <label for="pass"><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" name="pass" required>
-            <label for="cpass"><b>Confirm Password</b></label>
-            <input type="password" placeholder="Confirm Password" name="cpass" required>
-            <button class="btn btn-primary btn-block" type="submit">Sign up</button>
+{% block body %}
+<div class="signup-container">
+    <div class="signup-card">
+        <!-- Signup Header -->
+        <div class="signup-header">
+            <img src="{% static 'assets/logo.png' %}" alt="Logo" class="signup-logo">
+            <h2>Create Your Account</h2>
+            <p>Join thousands of happy renters and landlords</p>
+            
+            {% if msg %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                {{ msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
         </div>
-    </form>
+
+        <!-- Signup Form -->
+        <form class="signup-form" action="/register" method="post">
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                <!-- Personal Information -->
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input type="text" id="name" name="name" placeholder="John Doe" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        <input type="email" id="email" name="email" placeholder="user@example.com" required>
+                    </div>
+                </div>
+
+                <!-- Location Information -->
+                <div class="form-group">
+                    <label for="location">Street Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                        <input type="text" id="location" name="location" placeholder="123 Main St" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-city"></i></span>
+                        <input type="text" id="city" name="city" placeholder="Pokhara" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="state">State</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-globe-asia"></i></span>
+                        <input type="text" id="state" name="state" placeholder="Gandaki" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                        <input type="tel" id="phone" name="phone" placeholder="9876543210" pattern="[0-9]{10}" required>
+                    </div>
+                </div>
+
+                <!-- Password Section -->
+                <div class="form-group">
+                    <label for="pass">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input type="password" id="pass" name="pass" placeholder="Create password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('pass')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-bar"></div>
+                        <span class="strength-text">Password strength</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cpass">Confirm Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input type="password" id="cpass" name="cpass" placeholder="Confirm password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('cpass')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div class="form-check terms">
+                <input type="checkbox" class="form-check-input" id="terms" required>
+                <label class="form-check-label" for="terms">
+                    I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-signup">
+                <i class="fas fa-user-plus"></i> Create Account
+            </button>
+
+            <!-- Login Link -->
+            <div class="login-link">
+                Already have an account? <a href="/login">Log in</a>
+            </div>
+        </form>
+    </div>
 </div>
-{%endblock%}
+
+<script>
+    function togglePassword(id) {
+        const passwordField = document.getElementById(id);
+        const toggleIcon = passwordField.nextElementSibling.querySelector('i');
+        
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            toggleIcon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            passwordField.type = "password";
+            toggleIcon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+
+    // Password strength indicator
+    document.getElementById('pass').addEventListener('input', function() {
+        const strengthBar = document.querySelector('.strength-bar');
+        const strengthText = document.querySelector('.strength-text');
+        const password = this.value;
+        let strength = 0;
+        
+        // Check for length
+        if (password.length > 7) strength++;
+        // Check for uppercase
+        if (password.match(/[A-Z]/)) strength++;
+        // Check for numbers
+        if (password.match(/[0-9]/)) strength++;
+        // Check for special chars
+        if (password.match(/[^A-Za-z0-9]/)) strength++;
+        
+        // Update strength meter
+        strengthBar.style.width = `${strength * 25}%`;
+        
+        // Update colors and text
+        if (strength < 2) {
+            strengthBar.style.backgroundColor = '#e74c3c';
+            strengthText.textContent = 'Weak';
+        } else if (strength < 4) {
+            strengthBar.style.backgroundColor = '#f39c12';
+            strengthText.textContent = 'Medium';
+        } else {
+            strengthBar.style.backgroundColor = '#2ecc71';
+            strengthText.textContent = 'Strong';
+        }
+    });
+</script>
+{% endblock %}

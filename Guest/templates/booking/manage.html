@@ -1,33 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
 
-{% block content %}
-<h2>Pending Booking Requests</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Booking ID</th>
-            <th>User</th>
-            <th>Property</th>
-            <th>Dates</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for booking in bookings %}
-        <tr>
-            <td>{{ booking.id }}</td>
-            <td>{{ booking.user.email }}</td>
-            <td>{{ booking.property }}</td>
-            <td>{{ booking.check_in }} to {{ booking.check_out }}</td>
-            <td>
-                <a href="{% url 'update_booking_status' booking.id 'approved' %}" class="btn btn-success btn-sm">Approve</a>
-                <a href="{% url 'update_booking_status' booking.id 'rejected' %}" class="btn btn-danger btn-sm">Reject</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5">No pending bookings</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="booking-manage-container">
+    <div class="page-header">
+        <h2><i class="fas fa-tasks"></i> Pending Booking Requests</h2>
+        <p>Manage incoming booking requests for your properties</p>
+    </div>
+    
+    {% if bookings %}
+    <div class="booking-table-container">
+        <table class="booking-table">
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Guest</th>
+                    <th>Property</th>
+                    <th>Dates</th>
+                    <th>Nights</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>#{{ booking.id }}</td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-name">{{ booking.user.name }}</div>
+                            <div class="user-email">{{ booking.user.email }}</div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if booking.property_type == 'room' %}
+                            Apartment #{{ booking.room.room_id }}
+                        {% else %}
+                            House #{{ booking.house.house_id }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ booking.check_in|date:"M d" }}<br>
+                        to {{ booking.check_out|date:"M d" }}
+                    </td>
+                    <td>{{ booking.get_duration }}</td>
+                    <td>₹{{ booking.get_total_price }}</td>
+                    <td>
+                        <span class="status-badge pending">{{ booking.get_status_display }}</span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'update_booking_status' booking.id 'approved' %}" 
+                               class="btn btn-success btn-sm">
+                               <i class="fas fa-check"></i> Approve
+                            </a>
+                            <a href="{% url 'update_booking_status' booking.id 'rejected' %}" 
+                               class="btn btn-danger btn-sm">
+                               <i class="fas fa-times"></i> Reject
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <img src="{% static 'assets/no-pending.svg' %}" alt="No pending bookings" class="empty-img">
+        <h4>No Pending Requests</h4>
+        <p>You don't have any pending booking requests at this time.</p>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

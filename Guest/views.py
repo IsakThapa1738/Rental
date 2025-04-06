@@ -44,30 +44,184 @@ def home(request):
 
 
 def search(request):
-    template = loader.get_template('home.html')
+    # Use render shortcut instead of loader
+    # template = loader.get_template('home.html')
     context = {}
+
     if request.method == 'GET':
-        typ = request.GET['type']
-        q = request.GET['q']
-        context.update({'type': typ})
-        context.update({'q':q})
-        results={}
-        if typ == 'House' and (bool(House.objects.filter(location=q)) or bool(House.objects.filter(city=q))):
-            results = House.objects.filter(location=q)
-            results = results | House.objects.filter(city=q)
-        elif typ == 'Apartment'  and (bool(Room.objects.filter(location=q)) or bool(House.objects.filter(city=q))):
-            results = Room.objects.filter(location=q)
-            results = results | Room.objects.filter(city=q)
+        # --- Get all potential filter parameters ---
+        typ = request.GET.get('type', '') # House or Apartment
+        q = request.GET.get('q', '').strip() # Location query (city, location, state)
+        keywords = request.GET.get('keywords', '').strip()
+        min_cost = request.GET.get('min_cost', '')
+        max_cost = request.GET.get('max_cost', '')
+        bedrooms = request.GET.get('bedrooms', '')
+        # Amenities - treat presence of param as 'yes' if using checkboxes without value="yes"
+        # Or check value if using value="yes" e.g., request.GET.get('ac') == 'yes'
+        ac = request.GET.get('ac', '') # Expecting 'yes' if checked
+        kitchen = request.GET.get('kitchen', '') # Expecting 'yes'
+        hall = request.GET.get('hall', '') # Expecting 'yes'
+        balcony = request.GET.get('balcony', '') # Expecting 'yes' (Note: model field is 'balcany')
+        sort_by = request.GET.get('sort_by', '') # e.g., 'price_asc', 'price_desc', 'date_new'
 
-        
-        if bool(results)== False:
-            print("messages")
-            messages.success(request, "No matching results for your query..")
+        # --- Pass parameters back to context for form repopulation ---
+        context.update({
+            'type': typ,
+            'q': q,
+            'keywords': keywords,
+            'min_cost': min_cost,
+            'max_cost': max_cost,
+            'bedrooms': bedrooms,
+            'ac': ac,
+            'kitchen': kitchen,
+            'hall': hall,
+            'balcony': balcony,
+            'sort_by': sort_by,
+        })
 
-        result = [results, len(results)]
-        context.update({'result': result})
+        results_queryset = None
 
-    return HttpResponse(template.render(context, request))
+        # --- Apply filters based on type ---
+        if typ == 'House':
+            results_queryset = House.objects.all()
+            model_name = "House"
+
+            # Location Filter (City, Location, State) - Case Insensitive Contains
+            if q:
+                results_queryset = results_queryset.filter(
+                    Q(location__icontains=q) |
+                    Q(city__icontains=q) |
+                    Q(state__icontains=q)
+                )
+
+            # Keyword Filter (Description) - Case Insensitive Contains
+            if keywords:
+                results_queryset = results_queryset.filter(desc__icontains=keywords)
+
+            # Price Filter
+            try:
+                if min_cost:
+                    results_queryset = results_queryset.filter(cost__gte=int(min_cost))
+                if max_cost:
+                    results_queryset = results_queryset.filter(cost__lte=int(max_cost))
+            except ValueError:
+                messages.error(request, "Invalid price value entered.")
+                # Decide if you want to stop or continue without price filter
+                # results_queryset = House.objects.none() # Option: show no results on bad input
+
+            # Bedroom Filter (Minimum number)
+            try:
+                if bedrooms:
+                    results_queryset = results_queryset.filter(bedrooms__gte=int(bedrooms))
+            except ValueError:
+                 messages.error(request, "Invalid bedroom value entered.")
+                 # results_queryset = House.objects.none()
+
+            # Amenity Filters (Case Insensitive Exact Match for 'yes'/'no' fields)
+            if ac == 'yes':
+                 # Assuming your model stores 'yes' or 'no'. Adjust if different.
+                results_queryset = results_queryset.filter(AC__iexact='yes')
+            if kitchen == 'yes':
+                 # Assuming your model stores an integer for kitchens in House? If so:
+                 # results_queryset = results_queryset.filter(kitchen__gte=1)
+                 # If it's CharField 'yes'/'no' like Room:
+                 messages.warning(request, "Kitchen filter might behave unexpectedly for Houses based on model definition (IntegerField).")
+                 # Adjust logic based on how you store House kitchen info. Let's assume CharField for now:
+                 results_queryset = results_queryset.filter(kitchen__iexact='yes') # MODIFY IF NEEDED
+            if hall == 'yes':
+                results_queryset = results_queryset.filter(hall__iexact='yes')
+            if balcony == 'yes':
+                # Use the actual field name from your model
+                results_queryset = results_queryset.filter(balcany__iexact='yes') # Field name is 'balcany'
+
+        elif typ == 'Apartment': # Corresponds to Room model
+            results_queryset = Room.objects.all()
+            model_name = "Apartment"
+
+            # Location Filter (City, Location, State)
+            if q:
+                results_queryset = results_queryset.filter(
+                    Q(location__icontains=q) |
+                    Q(city__icontains=q) |
+                    Q(state__icontains=q)
+                )
+
+            # Keyword Filter (Description)
+            if keywords:
+                results_queryset = results_queryset.filter(desc__icontains=keywords)
+
+            # Price Filter
+            try:
+                if min_cost:
+                    results_queryset = results_queryset.filter(cost__gte=int(min_cost))
+                if max_cost:
+                    results_queryset = results_queryset.filter(cost__lte=int(max_cost))
+            except ValueError:
+                messages.error(request, "Invalid price value entered.")
+                # results_queryset = Room.objects.none()
+
+            # Bedroom Filter
+            try:
+                if bedrooms:
+                    results_queryset = results_queryset.filter(bedrooms__gte=int(bedrooms))
+            except ValueError:
+                 messages.error(request, "Invalid bedroom value entered.")
+                 # results_queryset = Room.objects.none()
+
+            # Amenity Filters
+            if ac == 'yes':
+                results_queryset = results_queryset.filter(AC__iexact='yes')
+            if kitchen == 'yes':
+                results_queryset = results_queryset.filter(kitchen__iexact='yes')
+            if hall == 'yes':
+                results_queryset = results_queryset.filter(hall__iexact='yes')
+            if balcony == 'yes':
+                # Use the actual field name from your model
+                results_queryset = results_queryset.filter(balcany__iexact='yes') # Field name is 'balcany'
+
+        else:
+             # No valid type selected, or initial search page load without type
+             if typ: # Only show error if a type was actually submitted
+                 messages.error(request, "Please select a valid property type (House or Apartment).")
+             results_queryset = None # Show no results unless a type is selected
+
+
+        # --- Apply Sorting ---
+        if results_queryset is not None:
+            if sort_by == 'price_asc':
+                results_queryset = results_queryset.order_by('cost')
+            elif sort_by == 'price_desc':
+                results_queryset = results_queryset.order_by('-cost')
+            elif sort_by == 'date_new':
+                results_queryset = results_queryset.order_by('-date')
+            else:
+                 # Default sort (maybe newest first?)
+                 results_queryset = results_queryset.order_by('-date') # Example default
+
+        # --- Prepare results for template ---
+        final_results = []
+        if results_queryset is not None:
+            final_results = list(results_queryset) # Evaluate queryset
+            if not final_results and (q or keywords or min_cost or max_cost or bedrooms or ac or kitchen or hall or balcony):
+                # Only show 'no results' if filters were actually applied
+                 messages.info(request, f"No matching {model_name}s found for your criteria.")
+        elif typ: # If a type was selected but no results_queryset was created (e.g. invalid type)
+            pass # Error message already handled
+
+
+        result_list = [final_results, len(final_results)]
+        context.update({'result': result_list})
+
+    # If not GET, or initial load before search
+    else:
+         context.update({'result': [[], 0]}) # Empty result list
+         # Optional: Add a default message for the initial page load if desired
+         # context.update({'msg': 'Search for properties using the filters.'})
+
+
+    # Use the render shortcut
+    return render(request, 'home.html', context)
+
 
 
 def about(request):

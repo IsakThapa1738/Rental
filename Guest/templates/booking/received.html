@@ -1,57 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
 
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/booking.css' %}">
+{% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <h2>Bookings Received</h2>
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Property</th>
-                    <th>Guest</th>
-                    <th>Dates</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for booking in bookings %}
-                <tr>
-                    <td>
-                        {% if booking.property_type == 'room' %}
-                            Apartment #{{ booking.room.room_id }}
-                        {% else %}
-                            House #{{ booking.house.house_id }}
-                        {% endif %}
-                    </td>
-                    <td>{{ booking.user.name }}</td>
-                    <td>{{ booking.check_in|date:"M d" }} - {{ booking.check_out|date:"M d" }}</td>
-                    <td>
-                        <span class="badge 
-                            {% if booking.status == 'approved' %}bg-success
-                            {% elif booking.status == 'rejected' %}bg-danger
-                            {% else %}bg-warning{% endif %}">
-                            {{ booking.get_status_display }}
-                        </span>
-                    </td>
-                    <td>
-                        {% if booking.status == 'pending' %}
-                        <div class="btn-group btn-group-sm">
-                            <a href="{% url 'update_booking_status' booking.id 'approved' %}" 
-                               class="btn btn-success">Approve</a>
-                            <a href="{% url 'update_booking_status' booking.id 'rejected' %}" 
-                               class="btn btn-danger">Reject</a>
-                        </div>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5">No booking requests found</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+{% block body %}
+<div class="booking-received-container">
+    <div class="page-header">
+        <h2><i class="fas fa-inbox"></i> Bookings Received</h2>
+        <p>All booking requests for your properties</p>
     </div>
+    
+    <div class="booking-filters">
+        <div class="filter-group">
+            <label>Filter by status:</label>
+            <div class="btn-group btn-group-sm">
+                <a href="?status=all" class="btn {% if not request.GET.status or request.GET.status == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+                <a href="?status=pending" class="btn {% if request.GET.status == 'pending' %}btn-primary{% else %}btn-outline-primary{% endif %}">Pending</a>
+                <a href="?status=approved" class="btn {% if request.GET.status == 'approved' %}btn-primary{% else %}btn-outline-primary{% endif %}">Approved</a>
+                <a href="?status=rejected" class="btn {% if request.GET.status == 'rejected' %}btn-primary{% else %}btn-outline-primary{% endif %}">Rejected</a>
+            </div>
+        </div>
+    </div>
+    
+    {% if bookings %}
+    <div class="booking-list">
+        {% for booking in bookings %}
+        <div class="booking-item {% if booking.status == 'approved' %}approved{% elif booking.status == 'rejected' %}rejected{% else %}pending{% endif %}">
+            <div class="booking-header">
+                <h3>
+                    {% if booking.property_type == 'room' %}
+                        Apartment #{{ booking.room.room_id }}
+                    {% else %}
+                        House #{{ booking.house.house_id }}
+                    {% endif %}
+                </h3>
+                <span class="status-badge">{{ booking.get_status_display }}</span>
+            </div>
+            
+            <div class="booking-details">
+                <div class="detail">
+                    <i class="fas fa-user"></i>
+                    <span>{{ booking.user.name }}</span>
+                </div>
+                <div class="detail">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>{{ booking.check_in|date:"M d, Y" }} - {{ booking.check_out|date:"M d, Y" }}</span>
+                </div>
+                <div class="detail">
+                    <i class="fas fa-tag"></i>
+                    <span>₹{{ booking.get_total_price }}</span>
+                </div>
+                {% if booking.notes %}
+                <div class="detail">
+                    <i class="fas fa-comment"></i>
+                    <span class="notes">{{ booking.notes }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if booking.status == 'pending' %}
+            <div class="booking-actions">
+                <a href="{% url 'update_booking_status' booking.id 'approved' %}" 
+                   class="btn btn-success">
+                   <i class="fas fa-check"></i> Approve
+                </a>
+                <a href="{% url 'update_booking_status' booking.id 'rejected' %}" 
+                   class="btn btn-danger">
+                   <i class="fas fa-times"></i> Reject
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <img src="{% static 'assets/no-bookings.svg' %}" alt="No bookings" class="empty-img">
+        <h4>No Bookings Found</h4>
+        <p>No booking requests match your current filters.</p>
+        <a href="?status=all" class="btn btn-primary">
+            <i class="fas fa-sync"></i> Reset Filters
+        </a>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
