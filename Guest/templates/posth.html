@@ -1,67 +1,177 @@
-{%extends 'base.html' %}
-{%load static%}
-{%block body%}
-<script type="text/javascript">
-    function PreviewImage() 
-    {
-        var oFReader = new FileReader();
-        oFReader.readAsDataURL(document.getElementById("uploadImage").files[0]);
-    
-        oFReader.onload = function (oFREvent) 
-        {
-            document.getElementById("uploadPreview").src = oFREvent.target.result;
-        };
-    };
-    
-</script>
-<div class="w3-container" style="margin-top:1%; margin-left: 10%; margin-right: 10%; margin-bottom: 1%;">
-    <h2 style="text-align: center;"><b>Post ad for House</b></h2>
+{% extends 'base.html' %}
+{% load static %}
 
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/posth.css' %}">
+{% endblock %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-success alert-dismissible" role="alert">
-              <strong>{{ message }}</strong> 
+{% block body %}
+<div class="post-property-container">
+    <div class="post-property-header">
+        <h1><i class="fas fa-home"></i> Post House Listing</h1>
+        <p>Fill out the form below to list your house for rent</p>
+        
+        {% if messages %}
+        <div class="alert-container">
+            {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        {% endfor %}
-    {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
 
-    <a href="/post/"><button style="float: right;" type="submit" class="btn btn-success btn-sm">Post ad for Apartment</button></a>
-    <br>
-    <div id = "id1">
-        <form action="/posth/" method="post" enctype="multipart/form-data">
-            <div class="container">
-                {% csrf_token %}
-                <label for= 'location'><b>Location</b></label>
-                <input type="text" placeholder="Amalbagh" name="location" required>
-                <label for="email"><b>City</b></label>
-                <input type="text" placeholder="Lucknow" name="city" required>
-                <label for="state"><b>State</b></label>
-                <input type="text" placeholder="Uttar pradesh" name="state" required>
-                <label for="Phone"><b>Area</b></label>
-                <input style="width: 100%; height: 50px; margin-bottom: 10px;" type="number"  placeholder="enter in sqaure ft." name="area" required>
-                <label for="Floors"><b>Floors</b></label>
-                <input style="width: 100%; height: 50px; margin-bottom: 10px;" type="number"  placeholder="enter number of floors" name="floor" required>
-                <label for="Cost"><b>Cost</b></label>
-                <input style="width: 100%; height: 50px;margin-bottom: 10px;" type="number" placeholder="cost in rupee" name="cost" required>
-                <label for="hall"><b>Hall</b></label>
-                <input type="text" placeholder="Yes/No" name="hall" required>
-                <label for="kitchen"><b>Kitchen</b></label>
-                <input type="number" placeholder="1" name="kitchen" required>
-                <label for="Balcany"><b>Balcany</b></label>
-                <input type="text" placeholder="Yes/No" name="balcany" required>
-                <label for="Bedrooms"><b>Bedrooms</b></label>
-                <input style="width: 100%; height: 50px;margin-bottom: 10px;" type="number"  placeholder="enter number of bedroom" name="bedroom" required>
-                <label for="AC"><b>AC</b></label>
-                <input type="text" placeholder="Yes/No" name="AC">
-                <label for= "comment"><b>Description</b></label><br>
-                <textarea style="width: 100%" name="desc" ></textarea> <br>
-                <label for="image"><b>Upload Picture</b></label><br>
-                <input id="uploadImage" type="file" name="img" onchange="PreviewImage();" />
-                <img name="img" id="uploadPreview" style="width: 100px; height: 100px;" />
-                <button class="btn btn-primary btn-block" type="submit">Post</button>
+    <div class="post-property-actions">
+        <a href="/post/" class="btn btn-apartment-listing">
+            <i class="fas fa-building"></i> Post Apartment Instead
+        </a>
+    </div>
+
+    <div class="post-property-card">
+        <form action="/posth/" method="post" enctype="multipart/form-data" class="property-form">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h3><i class="fas fa-map-marker-alt"></i> Location Details</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="location">Street Address</label>
+                        <input type="text" id="location" name="location" placeholder="e.g. 123 Main Street" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" name="city" placeholder="e.g. Pokhara" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" id="state" name="state" placeholder="e.g. Gandaki" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-home"></i> House Details</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="area">Area (sq ft)</label>
+                        <input type="number" id="area" name="area" placeholder="e.g. 1500" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="floor">Number of Floors</label>
+                        <input type="number" id="floor" name="floor" placeholder="e.g. 2" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cost">Monthly Rent (₹)</label>
+                        <input type="number" id="cost" name="cost" placeholder="e.g. 25000" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bedroom">Bedrooms</label>
+                        <select id="bedroom" name="bedroom" required>
+                            <option value="" disabled selected>Select number</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5+">5+</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="AC">Air Conditioning</label>
+                        <select id="AC" name="AC" required>
+                            <option value="" disabled selected>Select option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="kitchen">Kitchens</label>
+                        <select id="kitchen" name="kitchen" required>
+                            <option value="" disabled selected>Select number</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="hall">Living Room</label>
+                        <select id="hall" name="hall" required>
+                            <option value="" disabled selected>Select option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="balcany">Balcony</label>
+                        <select id="balcany" name="balcany" required>
+                            <option value="" disabled selected>Select option</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-align-left"></i> Description</h3>
+                <div class="form-group">
+                    <label for="desc">Detailed Description</label>
+                    <textarea id="desc" name="desc" rows="5" placeholder="Describe your house (features, amenities, nearby facilities, etc.)"></textarea>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fas fa-camera"></i> Photos</h3>
+                <div class="image-upload-container">
+                    <div class="image-upload-box">
+                        <input type="file" id="uploadImage" name="img" accept="image/*" onchange="PreviewImage();" required>
+                        <label for="uploadImage" class="upload-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Click to upload photos</span>
+                            <small>Recommended size: 1200x800 pixels</small>
+                        </label>
+                    </div>
+                    <div class="image-preview">
+                        <img id="uploadPreview" src="{% static 'assets/image-placeholder.jpg' %}" alt="Preview">
+                        <button type="button" class="btn-remove-image" onclick="removeImage()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-submit">
+                <button type="submit" class="btn btn-submit">
+                    <i class="fas fa-paper-plane"></i> Post Listing
+                </button>
             </div>
         </form>
     </div>
 </div>
-{%endblock%}
+
+<script>
+function PreviewImage() {
+    var oFReader = new FileReader();
+    oFReader.readAsDataURL(document.getElementById("uploadImage").files[0]);
+
+    oFReader.onload = function (oFREvent) {
+        document.getElementById("uploadPreview").src = oFREvent.target.result;
+        document.querySelector('.image-preview').style.display = 'block';
+    };
+};
+
+function removeImage() {
+    document.getElementById("uploadImage").value = "";
+    document.getElementById("uploadPreview").src = "{% static 'assets/image-placeholder.jpg' %}";
+    document.querySelector('.image-preview').style.display = 'none';
+}
+</script>
+{% endblock %}
